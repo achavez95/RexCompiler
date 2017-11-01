@@ -7,50 +7,67 @@
 
 import ply.lex as lex
 
-keywords = (
-    'var', 'integer', 'decimal', 'fraction', 'string', 'program', 'function',
-    'if', 'else', 'for', 'while', 'print', 'or', 'not', 'and', 'return', 'boolean',
-    )
+keywords = {
+    'var' : 'VAR',
+    'int' : 'INTEGER',
+    'dec' : 'DECIMAL',
+    'fracc' : 'FRACTION',
+    'string' : 'STRING',
+    'program' : 'PROGRAM',
+    'function' : 'FUNCTION',
+    'if' : 'IF',
+    'else' : 'ELSE',
+    'for' : 'FOR',
+    'while' : 'WHILE',
+    'print' : 'PRINT',
+    'or' : 'OR',
+    'not' : 'NOT',
+    'and' : 'AND',
+    'return' : 'RETURN',
+    'bool' : 'BOOLEAN',
+    'true' : 'TRUE',
+    'false' : 'FALSE',
+    'void' : 'VOID',
+    }
 
-tokens = keywords + (
-    'equals', 'plus', 'minus', 'times', 'divide', 'power', 'modulo', 'lparen', 'rparen',
-    'lbrace', 'rbrace', 'lbrack', 'rbrack', 'newline', 'comma', 'id', 'semi',
-    'rquote', 'lquote', 'lt', 'le', 'gt', 'ge', 'ne', 'exmark', 'decimal_cons',
-    'integer_cons', 'string_cons',
-    )
+tokens = [
+    'EQUALS', 'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'POWER', 'MODULO', 'LPAREN', 'RPAREN',
+    'LBRACE', 'RBRACE', 'LBRACK', 'RBRACK', 'NEWLINE', 'COMMA', 'ID', 'SEMI', 'COLON',
+    'RQUOTE', 'LQUOTE', 'LT', 'LE', 'GT', 'GE', 'NE', 'EXMARK', 'DECIMAL_CONS',
+    'INTEGER_CONS', 'STRING_CONS', 'FRACTION_CONS', 'DIF', 'COMMENT'
+    ]
 
-def t_ID(t) :
-    r'[a-z][a-zA-Z0-9]*'
-    if t.value in keywords:
-        t.type = t.value
-    return t
+tokens += keywords.values()
 
-t_equals = r'='
-t_plus = r'\+'
-t_minus = r'-'
-t_times = r'\*'
-t_power = r'\^'
-t_divide = r'/'
-t_lparen = r'\('
-t_rparen = r'\)'
-t_lbrack = r'\['
-t_rbrack = r'\]'
-t_lbrace = r'\{'
-t_rbrace = r'\}'
-t_lt = r'<'
-t_le = r'<='
-t_gt = r'>'
-t_ge = r'>='
-t_ne = r'<>'
-t_comma = r'\,'
-t_semi = r';'
-t_integer = r'\d+'
-t_decimal = r'(\d*\.\d+)'
-t_fraction = r'(\d+\/\d+)'
-t_string = r'\".*?\"'
-t_exmark = r'!'
-t_rquote = r'"'
-t_lquote = r'."'
+
+t_ignore = '\n \t'
+t_EQUALS = r'='
+t_PLUS = r'\+'
+t_MINUS = r'-'
+t_TIMES = r'\*'
+t_POWER = r'\^'
+t_DIVIDE = r'/'
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
+t_LBRACK = r'\['
+t_RBRACK = r'\]'
+t_LBRACE = r'\{'
+t_RBRACE = r'\}'
+t_LT = r'<'
+t_LE = r'<='
+t_GT = r'>'
+t_GE = r'>='
+t_NE = r'!='
+t_DIF = r'<>'
+t_COMMA = r'\,'
+t_SEMI = r';'
+t_COLON = r':'
+t_FRACTION_CONS = r'[-]?\d+\|d+'
+t_STRING_CONS = r'\".*?\"'
+t_EXMARK = r'!'
+t_RQUOTE = r'"'
+t_LQUOTE = r'."'
+t_COMMENT = r'//'
 
 ###########################################################################
 #   t_decimal_cons
@@ -72,8 +89,14 @@ def t_integer_cons(t):
     t.value = int(t.value)
     return t
 
+def t_ID(t) :
+    r'[a-z][a-zA-Z0-9]*'
+    if t.value in keywords:
+        t.type = keywords[t.value]
+    return t
+
 def t_NEWLINE(t):
-    r'\n'
+    r'\n+'
     t.lexer.lineno += 1
     return t
 
@@ -85,5 +108,3 @@ lexer = lex.lex()
 if __name__ == "__main__":
     lex.runmain(lexer)
 
-
-lex.lex(debug=0)
