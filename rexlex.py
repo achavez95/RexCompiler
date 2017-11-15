@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*- 
+
 ###########################################################################
 #   rexlex.py
 #   Análisis léxico de Rex
@@ -34,7 +36,7 @@ tokens = [
     'EQUALS', 'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'POWER', 'MODULO', 'LPAREN', 'RPAREN',
     'LBRACE', 'RBRACE', 'LBRACK', 'RBRACK', 'NEWLINE', 'COMMA', 'ID', 'SEMI', 'COLON',
     'RQUOTE', 'LQUOTE', 'LT', 'LE', 'GT', 'GE', 'NE', 'EXMARK', 'DECIMAL_CONS',
-    'INTEGER_CONS', 'STRING_CONS', 'FRACTION_CONS', 'DIF', 'COMMENT'
+    'INTEGER_CONS', 'STRING_CONS', 'FRACTION_CONS', 'DIF', 'COMMENT', 'SAME'
     ]
 
 tokens += keywords.values()
@@ -42,9 +44,11 @@ tokens += keywords.values()
 
 t_ignore = '\n \t'
 t_EQUALS = r'='
+t_SAME = r'=='
 t_PLUS = r'\+'
 t_MINUS = r'-'
 t_TIMES = r'\*'
+t_MODULO = r'%'
 t_POWER = r'\^'
 t_DIVIDE = r'/'
 t_LPAREN = r'\('
@@ -70,21 +74,21 @@ t_LQUOTE = r'."'
 t_COMMENT = r'//'
 
 ###########################################################################
-#   t_decimal_cons
+#   t_DECIMAL_CONS
 #   Expresión regular para detectar los números con decimales
 ##########################################################################
 
-def t_decimal_cons(t):
+def t_DECIMAL_CONS(t):
     r'[-]?\d+\.\d+'
     t.value = float(t.value)
     return t
 
 ###########################################################################
-#   t_integer_cons
+#   t_INTEGER_CONS
 #   Expresión regular para detectar los números enteros
 ##########################################################################
 
-def t_integer_cons(t):
+def t_INTEGER_CONS(t):
     r'[-]?\d+'
     t.value = int(t.value)
     return t
