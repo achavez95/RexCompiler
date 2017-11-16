@@ -4,3 +4,6 @@ class Cuadruplo:
 		self.pos2 = pos2
 		self.pos3 = pos3
 		self.pos4 = pos4
+
+	def updatedir(self, pos4):
+                self.pos4 = pos4

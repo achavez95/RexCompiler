@@ -46,7 +46,7 @@ t_ignore = '\n \t'
 t_EQUALS = r'='
 t_SAME = r'=='
 t_PLUS = r'\+'
-t_MINUS = r'-'
+t_MINUS = r'\-'
 t_TIMES = r'\*'
 t_MODULO = r'%'
 t_POWER = r'\^'
@@ -66,7 +66,7 @@ t_DIF = r'<>'
 t_COMMA = r'\,'
 t_SEMI = r';'
 t_COLON = r':'
-t_FRACTION_CONS = r'[-]?\d+\|d+'
+t_FRACTION_CONS = r'\d+\|d+'
 t_STRING_CONS = r'\".*?\"'
 t_EXMARK = r'!'
 t_RQUOTE = r'"'
@@ -79,7 +79,7 @@ t_COMMENT = r'//'
 ##########################################################################
 
 def t_DECIMAL_CONS(t):
-    r'[-]?\d+\.\d+'
+    r'\d+\.\d+'
     t.value = float(t.value)
     return t
 
@@ -89,7 +89,7 @@ def t_DECIMAL_CONS(t):
 ##########################################################################
 
 def t_INTEGER_CONS(t):
-    r'[-]?\d+'
+    r'\d+'
     t.value = int(t.value)
     return t
 

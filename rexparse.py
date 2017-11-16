@@ -78,6 +78,7 @@ cuadcount = 0
 pilao = Stack()
 ptipos = Stack()
 psaltos = Stack()
+pcuad = Stack()
 piladim = []
 
 #Lista de variables
@@ -86,7 +87,7 @@ listavar = []
 precedence = (
     ('left', 'OR'),
     ('left', 'AND'),
-    ('right', 'NOT'),
+    ('right', 'EXMARK'),
     ('left', 'GT', 'LT', 'GE', 'LE', 'NE', 'SAME'),
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDE', 'MODULO'),
@@ -145,13 +146,42 @@ def p_for(p):
     print (p[0])
 
 def p_while(p):
-    '''while : WHILE LPAREN expression RPAREN block'''
+    '''while : WHILE LPAREN expression RPAREN gotof block gotowhile updatejump'''
     print (p[0])
 
+def p_gotowhile(p):
+    '''gotowhile : empty'''
+    jump = psaltos.peek()
+    cuadruplo = Cuadruplo(15, None, None, jump)
+    cuadruplos.append(cuadruplo)
+
 def p_condition(p):
-    '''condition : IF LPAREN expression RPAREN block ELSE block
-    | IF LPAREN expression RPAREN block'''
+    '''condition : IF LPAREN expression RPAREN gotof block updatejump ELSE gotoif block updatejump
+    | IF LPAREN expression RPAREN gotof block updatejump'''
     print (p[0])
+    
+#Generación de cuadruplo goto para IF
+def p_gotoif(p):
+    '''gotoif : empty'''
+    cuadruplo = Cuadruplo(15, None, None, None)
+    cuadruplos.append(cuadruplo)
+    psaltos.push(len(cuadruplos) - 1)
+
+def p_gotof(p):
+    '''gotof : empty'''
+    a = pilao.pop()
+    tipoa = ptipos.pop()
+    if (tipoa == 4) :
+        cuadruplo = Cuadruplo(17, a, None, None)
+        cuadruplos.append(cuadruplo)
+        psaltos.push(len(cuadruplos) - 1)
+    else:
+        print ("Syntax error at '%s', incompatible types" % p[-1])
+
+def p_updatejump(p):
+    '''updatejump : empty'''
+    index = psaltos.pop()
+    cuadruplos[index].updatedir(len(cuadruplos) + 1)
 
 def p_var(p):
     '''var : VAR type var1 SEMI'''
@@ -228,16 +258,13 @@ def p_exp(p):
     | exp DIVIDE exp
     | exp TIMES exp
     | exp POWER exp'''
-    
     a = pilao.pop()
     tipoa = ptipos.pop()
     b = pilao.pop()
-    tipob = ptipos.pop()
+    tipob = ptipos.pop() 
     if (tipoResultante(tipob, tipoa, getNumOp(p[2])) != -1):
         cuadruplo = Cuadruplo(getNumOp(p[2]), b, a, 1000)
         cuadruplos.append(cuadruplo)
-        global cuadcount
-        cuadcount += 1
         pilao.push(1000)
         ptipos.push(tipoResultante(tipob, tipoa, getNumOp(p[2])))
     else:
@@ -256,15 +283,13 @@ def p_exp2(p):
     print (p[0])
 
 def p_expunary(p):
-    '''exp : NOT exp'''
+    '''exp : EXMARK exp'''
 
     a = pilao.pop()
     tipoa = ptipos.pop()
     if (tipoa == 4):
         cuadruplo = Cuadruplo(14, a, None, 1000)
         cuadruplos.append(cuadruplo)
-        cuadcount
-        cuadcount += 1
         pilao.push(1000)
         ptipos.push(4)
 
@@ -287,7 +312,14 @@ def p_pushid(p):
 
 def p_pushcons(p):
     '''pushcons : pushtype'''
-    pilao.push(p[-2])
+    if (type == 4) :
+        if (p[-2] == "true"):
+            pilao.push(1)
+        else:
+            pilao.push(0)
+    else :
+        pilao.push(p[-2])
+    
     print(p[-2])
 
 def p_empty(p):
@@ -304,11 +336,14 @@ def p_error(p):
 yacc.yacc()
 
 # data = 'program a; function b () { var x : int; } '
-data = 'program a; function b (x : int, y : int) { var int x,y; x=2+3;} '
+data = 'program a; function b (x : int, y : int) { var int x,y; if(1>0){if(2>0){x=2-2;}y=7+1;} else {x=1*2;} while(1>0){x=2+1;}} '
 
 t = yacc.parse(data)
 print (t)
 print (pilao)
 print (ptipos)
+print (len(cuadruplos))
+print (pcuad)
 for x in range (0, len(cuadruplos)) :
-    print (cuadruplos[x].pos1, ',' , cuadruplos[x].pos2, ',' ,cuadruplos[x].pos3, ',', cuadruplos[x].pos4)
+    print ('[',x+1,']',cuadruplos[x].pos1, ',' , cuadruplos[x].pos2,
+        ',' ,cuadruplos[x].pos3, ',', cuadruplos[x].pos4)

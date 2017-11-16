@@ -61,9 +61,9 @@ def getNumOp(op):
         return DIFERENTE
     elif op == '==':
         return IGUAL
-    elif op == '&&':
+    elif op == 'and':
         return AND
-    elif op == '||':
+    elif op == 'or':
         return OR
     else:
         return -1
@@ -104,5 +104,5 @@ CUBO = [
 
 def tipoResultante (operando1, operando2, operador):
     reng = operando1 * 5 + operando2
-    colu = operando2 + 2
+    colu = operador
     return CUBO[reng][colu]
