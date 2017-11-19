@@ -1,6 +1,28 @@
 # -*- coding: utf-8 -*- 
 
-#An implementation of Rex
+###########################################################################
+#   SUMA = 0
+#RESTA = 1
+#MULTIPLICACION = 2
+#DIVISION = 3
+#MODULO = 4
+#POTENCIA = 5
+#MENORQUE = 6
+#MENORIGUAL = 7
+#MAYORQUE = 8
+#MAYORIGUAL = 9
+#DIFERENTE = 10
+#IGUAL = 11
+#AND = 12
+#OR = 13
+#NOT = 14
+#GOTO = 15
+#GOTOT = 16
+#GOTOF = 17
+#ASSIGN = 18
+#CALL = 19
+#   Author: Andrés Alvarez
+##########################################################################
 
 from ply import *
 import rexlex
@@ -8,6 +30,7 @@ from cubo import *
 from stack import *
 from cuadruplo import *
 from variable import *
+from function import *
 import sys
 
 tokens = rexlex.tokens
@@ -17,7 +40,11 @@ class Memoria:
         self.memoria = {}
 
     def printVars(self):
-        print("MEMORIA", listavar, self.memoria.items())
+        print("Variables en memoria", listavar)
+        print("\n" + "MEMORIA" + "\n")
+        iter = 0
+        print(self.memoria.items())
+            
 
     def allocate(self, tipo, context, size):
         offset = 0 + 5000*context
@@ -138,25 +165,36 @@ class Memoria:
             self.memoria[count] = valor
             return count
 
+    def value(self, id):
+        return self.memoria[id]
+
     def updateVar(self, id, value):
         self.memoria[id] = value
 
     def deleteVar(self, id):
-        del self.memoria[id]
+        if id in self.memoria:
+            del self.memoria[id]
 
 memoria = Memoria()
 
 context = 0
+
+type = None
+
+parametercount = 0
+
+asParameter = False
 
 #Lista de cuadruplos y pilas
 cuadruplos = []
 pilao = Stack()
 ptipos = Stack()
 psaltos = Stack()
-piladim = []
 
 #Lista de variables
 listavar = []
+
+listafunc = []
 
 precedence = (
     ('left', 'OR'),
@@ -170,26 +208,77 @@ precedence = (
 
 #A Rex program is a serie of statements.
 def p_program(p):
-    '''program : PROGRAM ID SEMI function
-    | PROGRAM ID SEMI var function'''
+    '''program : PROGRAM ID SEMI program1
+    | PROGRAM ID SEMI var program1'''
     print (p[0])
+
+def p_program1(p):
+    '''program1 : function program1
+    | function'''
 
 def p_function(p):
-    '''function : FUNCTION ID LPAREN parameter RPAREN RETURN type block
-    | FUNCTION ID LPAREN RPAREN RETURN type block
-    | FUNCTION ID LPAREN RPAREN block
-    | FUNCTION ID LPAREN parameter RPAREN block'''
+    '''function : type FUNCTION ID pushid LPAREN parameter RPAREN savefunc block
+    | type FUNCTION ID pushid LPAREN RPAREN savefunc block'''
     print (p[0])
 
+def p_savefunc(p):
+    '''savefunc : empty'''
+    listparam = []
+    while pilao.size() > 1:
+        tipo = ptipos.pop()
+        param = pilao.pop()
+        var = Variable(tipo, param, None, 1, context+1)
+        listparam.append(var)
+    if any(f.id == pilao.peek() for f in listafunc):
+        print ("Syntax error, function %s has already been declared" % pilao.peek())
+        sys.exit()
+    for p in listparam:
+        p.updatememory(memoria.allocate(p.type, p.context, p.size))
+    tipo = ptipos.pop()
+    id = pilao.pop()
+    print(listparam)
+    func = Function(tipo, id, listparam, len(cuadruplos))
+    listafunc.append(func)
+    global context
+    context += 1
+
 def p_parameter(p):
-    '''parameter : ID COLON type
-    | ID COLON type COMMA parameter'''
+    '''parameter : type ID pushid
+    | type ID pushid COMMA parameter'''
     print (p[0])
 
 def p_block(p):
-    '''block : LBRACE statements RBRACE
-    | LBRACE RBRACE'''
+    '''block : LBRACE statements RETURN expression SEMI savereturn RBRACE
+    | LBRACE RETURN expression SEMI savereturn RBRACE
+    | LBRACE statements nortn RBRACE
+    | LBRACE nortn RBRACE
+    '''
     print (p[0])
+
+def p_blocknortn(p):
+    '''blocknortn : LBRACE statements RBRACE
+    | LBRACE RBRACE'''
+
+def p_nortn(p):
+    '''nortn : empty'''
+    func = listafunc[context-1]
+    if func.type != None:
+        print("Syntax error, missing return on function %s" % func.id)
+        sys.exit()
+
+def p_savereturn(p):
+    '''savereturn : empty'''
+    func = listafunc[context-1]
+    if func.type != None:
+        if func.type == ptipos.peek():
+            return
+        else:
+            print("Syntax error, returning a type different than the function's")
+            sys.exit()
+    else:
+        print("Syntax error, return on a void function")
+        sys.exit()
+    
 
 def p_statements(p):
     '''statements : statement
@@ -202,9 +291,9 @@ def p_statement(p):
     | while
     | for
     | dowhile
-    | comment
     | print
-    | var'''
+    | var
+    | funcall'''
     print (p[0])
 
 def p_print(p):
@@ -212,16 +301,49 @@ def p_print(p):
     | PRINT LPAREN STRING_CONS RPAREN SEMI
     | PRINT LPAREN ID RPAREN SEMI'''
 
-def p_comment(p):
-    '''comment : COMMENT ID'''
-    print (p[0])
+def p_funcall(p):
+    '''funcall : ID pushid LPAREN startcount expression exparam RPAREN assignvalues SEMI
+    | ID pushid RPAREN LPAREN assignvalues SEMI'''
+
+def p_startcount(p):
+    '''startcount : empty'''
+    global asParameter
+    asParameter = True
+
+def p_exparam(p):
+    '''exparam : COMMA expression exparam
+    | COMMA expression'''
+
+def p_assignvalues(p):
+    '''assignvalues : empty'''
+    
+    global asParameter
+    asParameter = False
+    listparam = []
+    listtype = []
+    print ("PARAMETERCOUNT: ", parametercount)
+    for i in range(0, parametercount):
+        
+        listparam.append(pilao.pop())
+        listtype.append(ptipos.pop())
+    id = pilao.pop()
+    tipo = ptipos.pop()
+    
+    for f in listafunc:
+        if f.id == id:
+            if len(f.parameters) == len(listparam):
+                for i in range(0, len(f.parameters)):
+                    if listtype[i] == f.parameters[i].type:
+                        
+                        memoria.updateVar(f.parameters[i].memory, memoria.value(listparam[i]))
+    
 
 def p_for(p):
-    '''for : LPAREN assignment expression SEMI expression RPAREN block'''
+    '''for : LPAREN assignment expression SEMI expression RPAREN blocknortn'''
     print (p[0])
 
 def p_dowhile(p) :
-    '''dowhile : DO pushjump block WHILE LPAREN expression RPAREN gotot'''
+    '''dowhile : DO pushjump blocknortn WHILE LPAREN expression RPAREN gotot'''
     print (p[0])
 
 def p_pushjump(p) :
@@ -241,7 +363,7 @@ def p_gotot(p) :
         print ("Syntax error at '%s', incompatible types" % p[-1]) 
 
 def p_while(p):
-    '''while : WHILE pushjump LPAREN expression RPAREN gotof block gotowhile'''
+    '''while : WHILE pushjump LPAREN expression RPAREN gotof blocknortn gotowhile'''
     print (p[0])
 
 def p_gotowhile(p):
@@ -253,8 +375,8 @@ def p_gotowhile(p):
     cuadruplos[index].updatedir(len(cuadruplos) + 1)
 
 def p_condition(p):
-    '''condition : IF LPAREN expression RPAREN gotof block ELSE gotoif block updatejump
-    | IF LPAREN expression RPAREN gotof block updatejump'''
+    '''condition : IF LPAREN expression RPAREN gotof blocknortn ELSE gotoif blocknortn updatejump
+    | IF LPAREN expression RPAREN gotof blocknortn updatejump'''
     print (p[0])
     
 #Generación de cuadruplo goto para IF
@@ -318,6 +440,11 @@ def p_settypebool(p):
     global type
     type = 4
 
+def p_settypevoid(p):
+    '''settypevoid : empty'''
+    global type
+    type = None
+
 def p_savevar(p):
     '''savevar : empty'''
     id = pilao.pop()
@@ -327,8 +454,12 @@ def p_savevar(p):
         if v.id == id:
             listavar.remove(v)
             memoria.deleteVar(v.memory)
+    if context != 0:
+        for v in listafunc[context-1].parameters:
+            if v.id == id:
+                memoria.deleteVar(v.memory)
     print("ID: ", id)
-    var = Variable(tipo, id, None, 1)
+    var = Variable(tipo, id, None, 1, context)
     print(var)
     listavar.append(var)
 
@@ -347,12 +478,33 @@ def p_type(p):
     | INTEGER settypeint
     | DECIMAL settypedec
     | STRING settypestring
-    | FRACTION settypefrac'''
-    print (p[0])
+    | FRACTION settypefrac
+    | VOID settypevoid'''
+    print ("TYPE SET: ", type)
 
 def p_assignment(p):
-    '''assignment : ID pushid EQUALS expression SEMI updatevar'''
+    '''assignment : ID pushid EQUALS expression SEMI updatevar
+    | ID pushid LBRACK expression RBRACK EQUALS expression SEMI updatecell'''
     print (p[0])
+
+def p_updatecell(p):
+    '''updatecell : empty'''
+    tipoa = ptipos.pop()
+    a = pilao.pop()
+    print("A: ", a)
+    tipob = ptipos.pop()
+    b = pilao.pop()
+    tipoc = ptipos.pop()
+    c = pilao.pop()
+
+    if tipob == 0:
+        for v in listavar:
+            if v.type == tipoa:
+                if v.id == c:
+                    cuadruplo = Cuadruplo(0, b, v.memory, memoria.allocate(0, 20, 1))
+                    cuadruplos.append(cuadruplo)
+                    cuadruploaux = Cuadruplo(18, a, None, memoria.value(cuadruplo.pos4))
+                    cuadruplos.append(cuadruploaux)
 
 def p_updatevar(p):
     '''updatevar : empty'''
@@ -401,6 +553,10 @@ def p_exp(p):
         cuadruplos.append(cuadruplo)
         pilao.push(cuadruplo.pos4)
         ptipos.push(tipores)
+        print("ASPARAM: ", asParameter)
+        if asParameter:
+            global parametercount
+            parametercount += 1
     else:
         print ("Syntax error at '%s', incompatible types" % p[2])
         
@@ -414,6 +570,9 @@ def p_exp2(p):
     | DECIMAL_CONS settypedec pushcons 
     | TRUE settypebool pushcons
     | FALSE settypebool pushcons'''
+    if asParameter:
+            global parametercount
+            parametercount += 1
     print (p[0])
 
 def p_expunary(p):
@@ -445,6 +604,7 @@ def p_pushtype(p):
 
 def p_pushid(p):
     '''pushid : pushtype'''
+    print("ID PUSHED: ", p[-1])
     pilao.push(p[-1])
 
 def p_pushdeclaredid(p):
@@ -481,17 +641,16 @@ def p_error(p):
 
 yacc.yacc()
 
-# data = 'program a; function b () { var x : int; } '
-data = '''program a; function b (x : int, y : int) {
-var dec x[5];
-var dec y;
-var string z;
+# data = 'program a; void function b () { var x : int; } '
+data = '''program a;
+var int c;
+void function ax (int x, dec y) {
+var int z;
+z = 2*50;
 
-z = "hello world";
+if (z>10) {}
 
-x = 2+2;
-
-if(x*2>0) {}
+ax(4, 4.5);
 }
 '''
 
@@ -500,7 +659,6 @@ print (t)
 print (pilao)
 print (ptipos)
 print (len(cuadruplos))
-print (listavar[1].type)
 memoria.printVars()
 for x in range (0, len(cuadruplos)) :
     print ('[',x+1,']',cuadruplos[x].pos1, ',' , cuadruplos[x].pos2,

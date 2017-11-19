@@ -72,7 +72,7 @@ t_STRING_CONS = r'\".*?\"'
 t_EXMARK = r'!'
 t_RQUOTE = r'"'
 t_LQUOTE = r'."'
-t_COMMENT = r'//'
+t_ignore_COMMENT = r'//'
 
 ###########################################################################
 #   t_DECIMAL_CONS
