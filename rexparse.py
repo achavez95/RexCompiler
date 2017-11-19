@@ -8,6 +8,7 @@ from cubo import *
 from stack import *
 from cuadruplo import *
 from variable import *
+import sys
 
 tokens = rexlex.tokens
 
@@ -15,70 +16,143 @@ class Memoria:
     def __init__(self):
         self.memoria = {}
 
-    def guardaTemporal(valor):
-        count = 10000
+    def printVars(self):
+        print("MEMORIA", listavar, self.memoria.items())
+
+    def allocate(self, tipo, context, size):
+        offset = 0 + 5000*context
         
-    
+        if tipo == 0:
+            count = 0 + offset
+            for i in self.memoria.items():
+                if not count in self.memoria:
+                    break
+                elif self.memoria[count] == None:
+                    break
+                count+=1
+            for i in range(count, count+size):
+                self.memoria[i] = "NI"
+            return count
 
-#Variables globales
-intglob = {}
-intglob_count = 0
-decglob = {}
-decglob_count = 100
-fracglob = {}
-fracglob_count = 200
-strglob = {}
-strglob_count = 300
-boolglob = {}
-boolglob_count = 400
+        if tipo == 1:
+            count = 1000 + offset
+            for i in self.memoria.items():
+                if not count in self.memoria:
+                    break
+                elif self.memoria[count] == None:
+                    break
+                count+=1
+            for i in range(count, count+size):
+                self.memoria[i] = "NI"
+            return count
 
-#Variables locales
-intloc = {}
-intloc_count = 500
-decloc = {}
-decloc_count = 700
-fracloc = {}
-fracloc_count = 900
-strloc = {}
-strloc_count = 1100
-boolloc = {}
-boolloc_count = 1300
+        if tipo == 2:
+            count = 2000 + offset
+            for i in self.memoria.items():
+                if not count in self.memoria:
+                    break
+                elif self.memoria[count] == None:
+                    break
+                count+=1
+            for i in range(count, count+size):
+                self.memoria[i] = "NI"
+            return count
 
-#Temporales
+        if tipo == 3:
+            count = 3000 + offset
+            for i in self.memoria.items():
+                if not count in self.memoria:
+                    break
+                elif self.memoria[count] == None:
+                    break
+                count+=1
+            for i in range(count, count+size):
+                self.memoria[i] = "NI"
+            return count
 
-inttemp = {}
-inttemp_count = 1500
-dectemp = {}
-dectemp_count = 1800
-fractemp = {}
-fractemp_count = 2100
-strtemp = {}
-strtemp_count = 2400
-booltemp = {}
-booltemp_count = 2700
+        if tipo == 4:
+            count = 4000 + offset
+            for i in self.memoria.items():
+                if not count in self.memoria:
+                    break
+                elif self.memoria[count] == None:
+                    break
+                count+=1
+            for i in range(count, count+size):
+                self.memoria[i] = "NI"
+            return count
 
-templist = []
-temp_count = 1500
+    def allocateCons(self, tipo, valor):
+        if tipo == 0:
+            count = 200000
+            for i in self.memoria.items():
+                if not count in self.memoria:
+                    break
+                elif self.memoria[count] == None or self.memoria[count] == valor:
+                    break
+                count+=1
+            self.memoria[count] = valor
+            return count
 
-#Constantes
-intconst = []
-intconst_count = 3000
-decconst = []
-decconst_count = 3300
-fracconst = []
-fracconst_count = 3600
-strconst = []
-strconst_count = 3900
-boolconst = []
-boolconst_count = 4100
+        if tipo == 1:
+            count = 210000
+            for i in self.memoria.items():
+                if not count in self.memoria:
+                    break
+                elif self.memoria[count] == None or self.memoria[count] == valor:
+                    break
+                count+=1
+            self.memoria[count] = valor
+            return count
+
+        if tipo == 2:
+            count = 220000
+            for i in self.memoria.items():
+                if not count in self.memoria:
+                    break
+                elif self.memoria[count] == None or self.memoria[count] == valor:
+                    break
+                count+=1
+            self.memoria[count] = valor
+            return count
+
+        if tipo == 3:
+            count = 230000
+            for i in self.memoria.items():
+                if not count in self.memoria:
+                    break
+                elif self.memoria[count] == None or self.memoria[count] == valor:
+                    break
+                count+=1
+            self.memoria[count] = valor
+            return count
+
+        if tipo == 4:
+            count = 240000
+            for i in self.memoria.items():
+                if not count in self.memoria:
+                    break
+                elif self.memoria[count] == None or self.memoria[count] == valor:
+                    break
+                count+=1
+            self.memoria[count] = valor
+            return count
+
+    def updateVar(self, id, value):
+        self.memoria[id] = value
+
+    def deleteVar(self, id):
+        del self.memoria[id]
+
+memoria = Memoria()
+
+context = 0
 
 #Lista de cuadruplos y pilas
 cuadruplos = []
-cuadcount = 0
 pilao = Stack()
 ptipos = Stack()
 psaltos = Stack()
-pcuad = Stack()
 piladim = []
 
 #Lista de variables
@@ -127,6 +201,7 @@ def p_statement(p):
     | assignment 
     | while
     | for
+    | dowhile
     | comment
     | print
     | var'''
@@ -145,18 +220,40 @@ def p_for(p):
     '''for : LPAREN assignment expression SEMI expression RPAREN block'''
     print (p[0])
 
+def p_dowhile(p) :
+    '''dowhile : DO pushjump block WHILE LPAREN expression RPAREN gotot'''
+    print (p[0])
+
+def p_pushjump(p) :
+    '''pushjump : empty'''
+    psaltos.push(len(cuadruplos)+1)
+
+def p_gotot(p) :
+    '''gotot : empty'''
+    a = pilao.pop()
+    tipoa = ptipos.pop()
+    if (tipoa == 4) :
+        jump = psaltos.pop()
+        cuadruplo = Cuadruplo(16, a, None, jump)
+        cuadruplos.append(cuadruplo)
+        psaltos.push(len(cuadruplos) - 1)
+    else:
+        print ("Syntax error at '%s', incompatible types" % p[-1]) 
+
 def p_while(p):
-    '''while : WHILE LPAREN expression RPAREN gotof block gotowhile updatejump'''
+    '''while : WHILE pushjump LPAREN expression RPAREN gotof block gotowhile'''
     print (p[0])
 
 def p_gotowhile(p):
     '''gotowhile : empty'''
-    jump = psaltos.peek()
+    index = psaltos.pop()
+    jump = psaltos.pop()
     cuadruplo = Cuadruplo(15, None, None, jump)
     cuadruplos.append(cuadruplo)
+    cuadruplos[index].updatedir(len(cuadruplos) + 1)
 
 def p_condition(p):
-    '''condition : IF LPAREN expression RPAREN gotof block updatejump ELSE gotoif block updatejump
+    '''condition : IF LPAREN expression RPAREN gotof block ELSE gotoif block updatejump
     | IF LPAREN expression RPAREN gotof block updatejump'''
     print (p[0])
     
@@ -165,6 +262,8 @@ def p_gotoif(p):
     '''gotoif : empty'''
     cuadruplo = Cuadruplo(15, None, None, None)
     cuadruplos.append(cuadruplo)
+    index = psaltos.pop()
+    cuadruplos[index].updatedir(len(cuadruplos) + 1)
     psaltos.push(len(cuadruplos) - 1)
 
 def p_gotof(p):
@@ -188,8 +287,10 @@ def p_var(p):
     print (p[0])
 
 def p_var1(p):
-    '''var1 : ID savevar
-    | ID savevar COMMA var1'''
+    '''var1 : ID pushid savevar allocatevar
+    | ID pushid savevar allocatevar COMMA var1
+    | ID pushid savevar LBRACK INTEGER_CONS updatesize RBRACK allocatevar COMMA var1
+    | ID pushid savevar LBRACK INTEGER_CONS updatesize RBRACK allocatevar'''
     print (p[0])
 
 def p_settypeint(p):
@@ -219,10 +320,27 @@ def p_settypebool(p):
 
 def p_savevar(p):
     '''savevar : empty'''
-    global var
-    print (p[-1])
-    var = Variable(type, p[-1], None, None)
+    id = pilao.pop()
+    tipo = ptipos.pop()
+    tipo = type
+    for v in listavar:
+        if v.id == id:
+            listavar.remove(v)
+            memoria.deleteVar(v.memory)
+    print("ID: ", id)
+    var = Variable(tipo, id, None, 1)
+    print(var)
     listavar.append(var)
+
+def p_allocatevar(p):
+    '''allocatevar : empty'''
+    var = listavar[len(listavar) - 1]
+    listavar[len(listavar) - 1].updatememory(memoria.allocate(var.type, context, var.size))
+
+def p_updatesize(p):
+    '''updatesize : empty'''
+    listavar[len(listavar) - 1].updatesize(p[-1])
+    
 
 def p_type(p):
     '''type : BOOLEAN settypebool
@@ -233,9 +351,24 @@ def p_type(p):
     print (p[0])
 
 def p_assignment(p):
-    '''assignment : type ID EQUALS expression SEMI
-    | ID EQUALS expression SEMI'''
+    '''assignment : ID pushid EQUALS expression SEMI updatevar'''
     print (p[0])
+
+def p_updatevar(p):
+    '''updatevar : empty'''
+    tipoa = ptipos.pop()
+    a = pilao.pop()
+    tipob = ptipos.pop()
+    b = pilao.pop()
+    for v in listavar:
+        if v.id == b:
+            if v.type == tipoa:
+                cuadruplo = Cuadruplo(18, a, None, v.memory)
+                cuadruplos.append(cuadruplo)
+            else:
+                print ("Syntax error, trying to assign a different type to %s" % b)
+        else:
+            print ("Syntax error at, %s is not declared" % b)
 
 def p_expression(p):
     '''expression : exp
@@ -261,18 +394,19 @@ def p_exp(p):
     a = pilao.pop()
     tipoa = ptipos.pop()
     b = pilao.pop()
-    tipob = ptipos.pop() 
-    if (tipoResultante(tipob, tipoa, getNumOp(p[2])) != -1):
-        cuadruplo = Cuadruplo(getNumOp(p[2]), b, a, 1000)
+    tipob = ptipos.pop()
+    tipores = tipoResultante(tipob, tipoa, getNumOp(p[2]))
+    if (tipores != -1):
+        cuadruplo = Cuadruplo(getNumOp(p[2]), b, a, memoria.allocate(tipores, 20, 1))
         cuadruplos.append(cuadruplo)
-        pilao.push(1000)
-        ptipos.push(tipoResultante(tipob, tipoa, getNumOp(p[2])))
+        pilao.push(cuadruplo.pos4)
+        ptipos.push(tipores)
     else:
         print ("Syntax error at '%s', incompatible types" % p[2])
         
 def p_exp2(p):
-    '''exp : ID pushid
-    | ID LBRACK expression RBRACK pushid
+    '''exp : ID pushdeclaredid
+    | ID LBRACK expression RBRACK pushdeclaredid
     | LBRACK exp RBRACK
     | INTEGER_CONS settypeint pushcons
     | STRING_CONS settypestring pushcons 
@@ -288,9 +422,9 @@ def p_expunary(p):
     a = pilao.pop()
     tipoa = ptipos.pop()
     if (tipoa == 4):
-        cuadruplo = Cuadruplo(14, a, None, 1000)
+        cuadruplo = Cuadruplo(14, a, None, memoria.allocate(4, 20))
         cuadruplos.append(cuadruplo)
-        pilao.push(1000)
+        pilao.push(cuadruplo.pos4)
         ptipos.push(4)
 
 def p_expgroup(p):
@@ -299,26 +433,38 @@ def p_expgroup(p):
 
 def p_pushtype(p):
     '''pushtype : empty'''
+    print ("type:",type)
     global type
     tipo = [x.type for x in listavar if x.id == p[-1]]
     if tipo:
-        type = tipo[0]
-    ptipos.push(type)
+        ptipos.push(tipo[0])
+    else:
+        ptipos.push(type)
+    print ("type:")
     print(type)
 
 def p_pushid(p):
     '''pushid : pushtype'''
     pilao.push(p[-1])
 
+def p_pushdeclaredid(p):
+    '''pushdeclaredid : pushtype'''
+    for v in listavar:
+        if v.id == p[-1]:
+            pilao.push(v.memory)
+            return
+    print ("Syntax error at '%s', variable not declared" % p[-1])
+    sys.exit()
+
 def p_pushcons(p):
     '''pushcons : pushtype'''
     if (type == 4) :
         if (p[-2] == "true"):
-            pilao.push(1)
+            memoria.allocateCons(4, 1)
         else:
-            pilao.push(0)
+            memoria.allocateCons(4, 0)
     else :
-        pilao.push(p[-2])
+        pilao.push(memoria.allocateCons(type, p[-2]))
     
     print(p[-2])
 
@@ -336,14 +482,26 @@ def p_error(p):
 yacc.yacc()
 
 # data = 'program a; function b () { var x : int; } '
-data = 'program a; function b (x : int, y : int) { var int x,y; if(1>0){if(2>0){x=2-2;}y=7+1;} else {x=1*2;} while(1>0){x=2+1;}} '
+data = '''program a; function b (x : int, y : int) {
+var dec x[5];
+var dec y;
+var string z;
+
+z = "hello world";
+
+x = 2+2;
+
+if(x*2>0) {}
+}
+'''
 
 t = yacc.parse(data)
 print (t)
 print (pilao)
 print (ptipos)
 print (len(cuadruplos))
-print (pcuad)
+print (listavar[1].type)
+memoria.printVars()
 for x in range (0, len(cuadruplos)) :
     print ('[',x+1,']',cuadruplos[x].pos1, ',' , cuadruplos[x].pos2,
         ',' ,cuadruplos[x].pos3, ',', cuadruplos[x].pos4)

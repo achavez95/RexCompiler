@@ -30,6 +30,7 @@ keywords = {
     'true' : 'TRUE',
     'false' : 'FALSE',
     'void' : 'VOID',
+    'do' : 'DO'
     }
 
 tokens = [
