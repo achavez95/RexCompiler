@@ -30,7 +30,9 @@ keywords = {
     'true' : 'TRUE',
     'false' : 'FALSE',
     'void' : 'VOID',
-    'do' : 'DO'
+    'do' : 'DO',
+    'call' : 'CALL',
+    'input' : 'INPUT'
     }
 
 tokens = [
@@ -72,7 +74,7 @@ t_STRING_CONS = r'\".*?\"'
 t_EXMARK = r'!'
 t_RQUOTE = r'"'
 t_LQUOTE = r'."'
-t_ignore_COMMENT = r'//'
+t_ignore_COMMENT = r'//.*'
 
 ###########################################################################
 #   t_DECIMAL_CONS

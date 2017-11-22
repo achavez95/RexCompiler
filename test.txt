@@ -1,0 +1,12 @@
+program a;
+var int c;
+
+int function heyo (int a) {
+	return a;
+}
+
+void function main () {
+    var int a;
+    input a;
+    print call heyo(a);
+}

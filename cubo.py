@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*- 
 
-###########################################################################
-#   cubo.py
-#   Cubo de operaciones
-#
-#   Author: Andrés Alvarez
-##########################################################################
 
 # Operadores
 INT = 0
@@ -14,7 +8,6 @@ FRAC = 2
 STRING = 3
 BOOLEAN = 4
 ERROR = -1
-#VOID = 5
 
 # Identificadores de operadores
 SUMA = 0
