@@ -1,0 +1,21 @@
+program a;
+var int c;
+
+void function main () {
+    var int a;
+    var int acum[10];
+    var int iter, iter2;
+    var int b;
+    iter = 0;
+    iter2 = 0;
+    input a;
+    while (a > iter) {
+	input b;
+	acum[iter] = b;
+	iter = iter + 1;
+    }
+    while (a > iter2) {
+	print (acum[iter2]);
+	iter2 = iter2 + 1;
+    }
+}

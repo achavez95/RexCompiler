@@ -217,6 +217,11 @@ class Memoria:
         for key in range(100000, 105000):
             if key in self.memoria:
                 del self.memoria[key]
+    #Obtiene la dirección de memoria de una constante
+    def getMemConst(self, value):
+        for key in range (200000, 205000):
+            if self.memoria[key] == value:
+                return key
 
                 
 #Inicialización de la memoria
@@ -754,6 +759,7 @@ def p_updatecell(p):
                 if v.id == c:
                     direc = memoria.allocate(0, 20, 1)
                     memoria.updateVar(direc, v.memory)
+                    print("VMEMORY: ", memoria.value(direc))
                     
                     cuadruplo = Cuadruplo(0, b, direc, memoria.allocate(0, 20, 1))
                     cuadruplos.append(cuadruplo)
@@ -765,8 +771,9 @@ def p_updatecell(p):
         for v in listafunc[context-1].parameters:
             if v.type == tipoa:
                 if v.id == c:
-                    direc = memoria.allocate(0, 20, 1)
-                    memoria.updateVar(direc, v.memory)
+                    
+                    direc = memoria.allocateCons(0, v.memory)
+                    print("HELLOVAR:", memoria.value(direc))
                     
                     cuadruplo = Cuadruplo(0, b, direc, memoria.allocate(0, 20, 1))
                     cuadruplos.append(cuadruplo)
@@ -937,6 +944,7 @@ def p_pushdeclaredid(p):
 def p_pushdeclaredarray(p):
     '''pushdeclaredarray : pushtype'''
     cell = pilao.pop()
+    print("CELL:", cell)
     tipocell = ptipos.pop()
     id = pilao.pop()
     if tipocell == 0:
@@ -946,7 +954,12 @@ def p_pushdeclaredarray(p):
                 return
         for v in listafunc[context-1].parameters:
             if v.id == id:
-                pilao.push(cell)
+                cuadruplo = Cuadruplo(0, memoria.getMemConst(v.memory), cell, memoria.allocate(0,20,1))
+                cuadruplos.append(cuadruplo)
+                cuadruplo = Cuadruplo (27, cuadruplo.pos4, 0, memoria.allocateCons(0, cuadruplo.pos4))
+                cuadruplos.append(cuadruplo)
+                pilao.push(cuadruplo.pos4)
+                ptipos.push(type)
                 return
     print ("Syntax error at '%s', variable not declared" % p[-1])
     sys.exit()

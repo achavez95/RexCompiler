@@ -41,6 +41,13 @@ class ActivationRecord:
 #Variable que indica el Activation Record actual
 currentActRec = None
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
 def suma(a, b, dir):
     print(listavar)
     print("SUMA")
@@ -156,7 +163,7 @@ def endfunc (a, b, dir):
     global cuaditer
     global currentActRec
     currentActRec.temps = memoria.getTemps()
-    print("ACTUALPARA: ", currentActRec.actualpara[0])
+    #print("ACTUALPARA: ", currentActRec.actualpara[0])
     currentActRec.printAll()
     
     if pagemark:
@@ -179,7 +186,13 @@ def era (a, b, dir):
 def inputop (a, b, dir):
     inputvar = input("INPUT: ")
     print(inputvar)
-    memoria.updateVar(dir, inputvar)
+    if is_number(inputvar):
+        memoria.updateVar(dir, int(inputvar))
+    else:
+        memoria.updateVar(dir, inputvar)
+
+def retmem (a, b, dir):
+    memoria.updateVar(dir, memoria.value(memoria.value(a)))
     
 #Valores para el switch
 operations = {0: suma,
@@ -208,7 +221,8 @@ operations = {0: suma,
               23: assigncell,
               24: endfunc,
               25: era,
-              26: inputop}
+              26: inputop,
+              27: retmem}
 #Creacion de ventana principal
 class MainWindow(tk.Frame):
     def __init__(self, *args, **kwargs):
