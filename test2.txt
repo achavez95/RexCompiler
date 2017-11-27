@@ -4,18 +4,21 @@ var int c;
 void function main () {
     var int a;
     var int acum[10];
-    var int iter, iter2;
+    var int iter, iter2, iter3;
     var int b;
+    var int temp;
     iter = 0;
     iter2 = 0;
+    iter3 = 0;
     input a;
     while (a > iter) {
 	input b;
 	acum[iter] = b;
 	iter = iter + 1;
     }
-    while (a > iter2) {
-	print (acum[iter2]);
-	iter2 = iter2 + 1;
+    iter = 0;
+    while (a > iter) {
+	print (acum[iter]);
+	iter = iter + 1;
     }
 }

@@ -7,12 +7,10 @@ int function heyo (int a) {
 
 void function main () {
     var int a;
-    var int acum[10];
-	acum = 1;
-    print (acum);
+    var int acum;
+    acum = 1;
     input a;
     while (a > 0) {
-	print(a);
 	acum = acum * a;
 	a = a - 1;
     }

@@ -209,7 +209,6 @@ class Memoria:
         result = {}
         for key in range(100000, 105000):
             if key in self.memoria:
-                print("GETTING TEMPS")
                 result[key] = self.memoria[key]
         return result
     #Borra la memoria temporal al cambiar de funcion en compilacion
@@ -300,7 +299,7 @@ precedence = (
 def p_program(p):
     '''program : PROGRAM ID SEMI gotomain program1
     | PROGRAM ID SEMI gotomain var program1'''
-    print (p[0])
+   
 
 #Instruccion que inserta el primer goto al main
 def p_gotomain(p):
@@ -317,7 +316,7 @@ def p_program1(p):
 def p_function(p):
     '''function : type FUNCTION ID pushid setcontext LPAREN parameter RPAREN savefunc block endfunc
     | type FUNCTION ID pushid setcontext LPAREN RPAREN savefunc block endfunc'''
-    print ("FUNCTION READ")
+    
 
 #Instrucción que actualiza el context una vez leido un id de funcion nuevo
 def p_setcontext(p):
@@ -335,8 +334,7 @@ def p_endfunc(p):
 #Guarda la funcion y sus parametros en la lista de funciones
 def p_savefunc(p):
     '''savefunc : empty'''
-    print("PILAOATSAVEFUN:", pilao)
-    print("PTIPOSATSAVEFUNC:", ptipos)
+    
     listparam = []
     global cuadruplos
     #Ciclo que saca todos los parametros
@@ -358,10 +356,10 @@ def p_savefunc(p):
     #Actualizar el primer goto al encontrar la funcion main
     if id == "main":
         cuadruplos[0].pos4 = len(cuadruplos)
-    print(listparam)
+    
     #Crear el objeto de la funcion
     func = Function(tipo, id, listparam, len(listparam), len(cuadruplos), memoria.allocate(tipo, 60, 1), len(listparam))
-    print("FRTN:", func.rtn)
+    
     #Agregarla a la lista
     listafunc.append(func)
 
@@ -370,7 +368,7 @@ def p_savefunc(p):
 def p_parameter(p):
     '''parameter : type ID pushid
     | type ID pushid COMMA parameter'''
-    print (p[0])
+    
     
 #Bloque principal de estatutos, utilizado por funciones
 def p_block(p):
@@ -389,9 +387,9 @@ def p_deletelocal(p):
 #variable local
 def p_vartoparam(p):
     '''vartoparam : empty'''
-    print("LISTAVAR:", listavar)
+    #pring("LISTAVAR:", listavar)
     for v in listavar:
-        print("VAR TO PARAM")
+        #pring("VAR TO PARAM")
         #si no es global agregarla a los parametros
         if v.context != 0:
             listafunc[context-1].parameters.append(v)
@@ -415,7 +413,7 @@ def p_simpleblock(p):
 def p_savereturn(p):
     '''savereturn : empty'''
     
-    print("PTIPOSATSAVE:", ptipos)
+    #pring("PTIPOSATSAVE:", ptipos)
     global listafunc
     func = listafunc[context-1]
     #Si la funcion no es void
@@ -423,8 +421,8 @@ def p_savereturn(p):
         #Si son del mismo tipo
         if func.type == ptipos.peek():
             value = pilao.pop()
-            print("PILAO:", value)
-            print("VALUE:", memoria.value(value))
+            #pring("PILAO:", value)
+            #pring("VALUE:", memoria.value(value))
             #Cuadruplo RETURN
             cuadruplo = Cuadruplo(20, None, None, value)
             cuadruplos.append(cuadruplo)
@@ -453,7 +451,7 @@ def p_statement(p):
     | funcall SEMI
     | return SEMI
     | input SEMI'''
-    print (p[0])
+    #print (p[0])
 
 #Regla que inserta el cuadruplo INPUT a la lista de cuadruplos
 def p_input(p):
@@ -470,7 +468,6 @@ def p_return(p):
 #Regla para insertar el cuadruplo PRINT
 def p_print(p):
     '''print : PRINT expression'''
-    print("PRINT")
     ptipos.pop()
     cuadruplo = Cuadruplo(21, None, None, pilao.pop())
     cuadruplos.append(cuadruplo)
@@ -517,9 +514,6 @@ def p_assignvalues(p):
     listtype = []
     #Bandera para indicar que la funcion existe
     flag = False
-    print ("PARAMETERCOUNT: ", parametercount)
-    print("PILAOATCALL:", pilao)
-    print("PTIPLOSATCALL:", ptipos)
     #Saca todos los parametros de las pilas
     for i in range(0, parametercount):
         listparam.append(pilao.pop())
@@ -529,7 +523,6 @@ def p_assignvalues(p):
     #Indica que la funcion actual ahora es id
     global funcid
     funcid = id
-    print("FUNCID:", funcid)
     tipo = ptipos.pop()
     #Ciclo que genera los cuadruplos de PARAM para asignar valores a parametros
     for f in listafunc:
@@ -540,7 +533,7 @@ def p_assignvalues(p):
                 for i in range(0, f.paramnumber):
                     if listtype[i] == f.parameters[i].type:
                         cuadruplo = Cuadruplo(22, listparam[i], None, f.parameters[i].memory)
-                        print("OP22:", cuadruplo)
+                        
                         cuadruplos.append(cuadruplo)
                     else:
                         print("Syntax error, type mismatch %s" % id)
@@ -563,11 +556,11 @@ def p_assignvalues(p):
  #Regla de for (NO IMPLEMENTADO)                       
 def p_for(p):
     '''for : LPAREN assignment expression SEMI expression RPAREN simpleblock'''
-    print (p[0])
+    
 #Regla de do while
 def p_dowhile(p) :
     '''dowhile : DO pushjump simpleblock WHILE LPAREN expression RPAREN gotot'''
-    print (p[0])
+
 #Regla que inserta el numero de cuadruplo actual a la pila de saltos
 def p_pushjump(p) :
     '''pushjump : empty'''
@@ -588,7 +581,7 @@ def p_gotot(p) :
 #Regla de while
 def p_while(p):
     '''while : WHILE pushjump LPAREN expression RPAREN gotof simpleblock gotowhile'''
-    print (p[0])
+
 
 #Regla que inserta un cuadruplo GOTO para hacer el ciclo 
 def p_gotowhile(p):
@@ -603,7 +596,7 @@ def p_gotowhile(p):
 def p_condition(p):
     '''condition : IF LPAREN expression RPAREN gotof simpleblock ELSE gotoif simpleblock updatejump
     | IF LPAREN expression RPAREN gotof simpleblock updatejump'''
-    print (p[0])
+   
     
 #Generación de cuadruplo goto para IF
 def p_gotoif(p):
@@ -637,7 +630,7 @@ def p_updatejump(p):
 def p_var(p):
     '''var : VAR type var1 SEMI var
     | VAR type var1 SEMI'''
-    print (p[0])
+    
 
 #Regla auxiliar que permite declarar arreglos
 def p_var1(p):
@@ -645,7 +638,7 @@ def p_var1(p):
     | ID pushid savevar allocatevar COMMA var1
     | ID pushid savevar LBRACK INTEGER_CONS updatesize RBRACK allocatevar COMMA var1
     | ID pushid savevar LBRACK INTEGER_CONS updatesize RBRACK allocatevar'''
-    print (p[0])
+    
 #Indica al parser que las variables que siguen son int
 def p_settypeint(p):
     '''settypeint : empty'''
@@ -707,7 +700,7 @@ def p_savevar(p):
         print("Syntax error, variable %s already declared on this scope" %id)
         sys.exit()
     
-    print("ID: ", id)
+    
     #Crea la variable y la mete a la lista
     var = Variable(tipo, id, None, 1, con, None)
     listavar.append(var)
@@ -731,13 +724,13 @@ def p_type(p):
     | STRING settypestring
     | FRACTION settypefrac
     | VOID settypevoid'''
-    print ("TYPE SET: ", type)
+    
 
 #Regla que permite asignar valores a variables
 def p_assignment(p):
     '''assignment : ID pushid EQUALS expression SEMI updatevar
     | ID pushid LBRACK expression RBRACK EQUALS expression SEMI updatecell'''
-    print (p[0])
+    
 
 #Regla que permite actualizar celdas de arreglos
 def p_updatecell(p):
@@ -745,7 +738,7 @@ def p_updatecell(p):
     #3 valores, lo que se va a asignar, la variable y el indice
     tipoa = ptipos.pop()
     a = pilao.pop()
-    print("A: ", a)
+    
     tipob = ptipos.pop()
     b = pilao.pop()
     tipoc = ptipos.pop()
@@ -759,7 +752,7 @@ def p_updatecell(p):
                 if v.id == c:
                     direc = memoria.allocate(0, 20, 1)
                     memoria.updateVar(direc, v.memory)
-                    print("VMEMORY: ", memoria.value(direc))
+                    
                     
                     cuadruplo = Cuadruplo(0, b, direc, memoria.allocate(0, 20, 1))
                     cuadruplos.append(cuadruplo)
@@ -773,7 +766,7 @@ def p_updatecell(p):
                 if v.id == c:
                     
                     direc = memoria.allocateCons(0, v.memory)
-                    print("HELLOVAR:", memoria.value(direc))
+                    
                     
                     cuadruplo = Cuadruplo(0, b, direc, memoria.allocate(0, 20, 1))
                     cuadruplos.append(cuadruplo)
@@ -782,14 +775,13 @@ def p_updatecell(p):
 #Actualiza el valor de una variable
 def p_updatevar(p):
     '''updatevar : empty'''
-    print("PILAOUPDATE:", pilao)
-    print("PTIPOSUPDATE:", ptipos)
+    
     tipoa = ptipos.pop()
     a = pilao.pop()
     tipob = ptipos.pop()
-    print(a)
+    
     b = pilao.pop()
-    print(listavar)
+    
     #Si existe en las variableslocales
     for v in listafunc[context-1].parameters:
         if v.id == b:
@@ -798,16 +790,16 @@ def p_updatevar(p):
                 #Genera cuadruplo de asignacion
                 cuadruplo = Cuadruplo(18, a, None, v.memory)
                 cuadruplos.append(cuadruplo)
-                print(cuadruplo)
+                
                 return
     #Si existe en las globales
     for v in listavar:
-        print("HELLO")
+        
         if v.id == b:
             if v.type == tipoa:
                 cuadruplo = Cuadruplo(18, a, None, v.memory)
                 cuadruplos.append(cuadruplo)
-                print(cuadruplo)
+                
                 return
             else:
                 print ("Syntax error, trying to assign a different type to %s" % b)
@@ -818,7 +810,7 @@ def p_updatevar(p):
 def p_expression(p):
     '''expression : exp
     '''
-    print (p[0])
+    
 
 #Regla que inserta cuadruplos a la lista de cuadruplos dependiendo de la operacion
 #sigue la precedencia declarada al principio
@@ -850,7 +842,7 @@ def p_exp(p):
         cuadruplos.append(cuadruplo)
         pilao.push(cuadruplo.pos4)
         ptipos.push(tipores)
-        print("ASPARAM:", asParameter)
+        
     else:
         print ("Syntax error at '%s', incompatible types" % p[2])
 #Regla que acepta exp individuales
@@ -864,7 +856,7 @@ def p_exp2(p):
     | DECIMAL_CONS settypedec pushcons 
     | TRUE settypebool pushcons
     | FALSE settypebool pushcons'''
-    print ("DECLARED:", asParameter)
+    
 #Operaciones unarias
 def p_expunary(p):
     '''exp : EXMARK exp'''
@@ -896,12 +888,12 @@ def p_pushrtn(p):
             cuadruplo = Cuadruplo(18, f.rtn, None, pilao.peek())
             cuadruplos.append(cuadruplo)
             break
-    print ("PUSHRTN: ", context-1)
+   
 
 #Mete el tipo de un id o constante a la pila
 def p_pushtype(p):
     '''pushtype : empty'''
-    print ("type:",type)
+    
     global type
     tipo = [x.type for x in listavar if x.id == p[-1]]
     tipob = None
@@ -913,17 +905,17 @@ def p_pushtype(p):
         ptipos.push(tipob[0])
     else:
         ptipos.push(type)
-    print ("type:", ptipos)
+   
 
 #Mete cualquier id a la pila
 def p_pushid(p):
     '''pushid : pushtype'''
-    print("ID PUSHED: ", p[-1])
+    
     pilao.push(p[-1])
 #Mete un id declarado anteriormente a la pila
 def p_pushdeclaredid(p):
     '''pushdeclaredid : pushtype'''
-    print("PUSHDECLAREDID")
+   
     for v in listavar:
         if v.id == p[-1]:
             if v.size > 1:
@@ -944,7 +936,7 @@ def p_pushdeclaredid(p):
 def p_pushdeclaredarray(p):
     '''pushdeclaredarray : pushtype'''
     cell = pilao.pop()
-    print("CELL:", cell)
+   
     tipocell = ptipos.pop()
     id = pilao.pop()
     if tipocell == 0:
@@ -973,8 +965,8 @@ def p_pushcons(p):
             memoria.allocateCons(4, 0)
     else :
         pilao.push(memoria.allocateCons(type, p[-2]))
-    print("PUSHCONS: ", p[-2])
-    print(p[-2])
+    
+    
 
 #Regla para indicar que no espera nada la regla
 def p_empty(p):

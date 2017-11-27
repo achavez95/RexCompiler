@@ -9,6 +9,8 @@ from function import *
 import sys
 import tkinter as tk
 from tkinter import *
+import math
+
 #Indica el cuadruplo a ejecutar
 cuaditer = 0
 #Pila de control para llamadas anidadas
@@ -49,8 +51,8 @@ def is_number(s):
         return False
 
 def suma(a, b, dir):
-    print(listavar)
-    print("SUMA")
+    #print(listavar)
+    #print("SUMA")
     res = memoria.value(a) + memoria.value(b)
     memoria.updateVar(dir, res)
 
@@ -63,7 +65,7 @@ def mult(a, b, dir):
     memoria.updateVar(dir, res)
 
 def div(a, b, dir):
-    res = memoria.value(a) / memoria.value(b)
+    res = int(memoria.value(a) / memoria.value(b))
     memoria.updateVar(dir, res)
 
 def modulo(a, b, dir):
@@ -76,6 +78,8 @@ def potencia(a, b, dir):
 
 def menorque(a, b, dir):
     res = memoria.value(a) < memoria.value(b)
+    #print("A: ", memoria.value(a))
+    #print("B: ", memoria.value(b))
     memoria.updateVar(dir, res)
 
 def menorigual(a, b, dir):
@@ -84,7 +88,7 @@ def menorigual(a, b, dir):
 
 def mayorque(a, b, dir):
     res = memoria.value(a) > memoria.value(b)
-    print("RES:", res)
+    #print("RES:", res)
     memoria.updateVar(dir, res)
 
 def mayorigual(a, b, dir):
@@ -114,7 +118,7 @@ def notop(a, b, dir):
 def goto (a, b, dir):
     global cuaditer
     cuaditer = dir - 1
-    print ("CUADITER", cuaditer)
+    #print ("CUADITER", cuaditer)
 
 def gotot (a, b, dir):
     if memoria.value(a):
@@ -136,12 +140,12 @@ def call (a, b, dir):
     pagemark.push(cuaditer)
     cuaditer = dir - 1
     controlstack.push(currentActRec)
-    print("STACKL:", controlstack.size())
+    #print("STACKL:", controlstack.size())
 
 def returnop (a, b, dir):
     global currentActRec
     currentActRec.returnvalue = memoria.value(dir)
-    print("CARECVAL: ", currentActRec.returnvalue)
+    #print("CARECVAL: ", currentActRec.returnvalue)
     value = memoria.value(dir)
     for f in listafunc:
         if currentActRec.id == f.id:
@@ -164,7 +168,7 @@ def endfunc (a, b, dir):
     global currentActRec
     currentActRec.temps = memoria.getTemps()
     #print("ACTUALPARA: ", currentActRec.actualpara[0])
-    currentActRec.printAll()
+    #currentActRec.printAll()
     
     if pagemark:
         cuaditer = pagemark.pop()
@@ -181,18 +185,18 @@ def era (a, b, dir):
     paramlist = []
     currentActRec = ActivationRecord(funcion.id, paramlist, None,
                                      funcion.parameters, None, currentActRec.id)
-    print("ERA:", currentActRec.id, currentActRec.localdata)
+    #print("ERA:", currentActRec.id, currentActRec.localdata)
 
 def inputop (a, b, dir):
     inputvar = input("INPUT: ")
-    print(inputvar)
+    #print(inputvar)
     if is_number(inputvar):
         memoria.updateVar(dir, int(inputvar))
     else:
         memoria.updateVar(dir, inputvar)
 
 def retmem (a, b, dir):
-    memoria.updateVar(dir, memoria.value(memoria.value(a)))
+    memoria.updateVar(math.floor(dir), memoria.value(math.floor(memoria.value(a))))
     
 #Valores para el switch
 operations = {0: suma,
@@ -309,12 +313,12 @@ def runProgram():
     pagemark.push(len(cuadruplos))
     while cuaditer < len(cuadruplos):
         c = cuadruplos[cuaditer]
-        print('[',cuaditer,']',cuadruplos[cuaditer])
+        #print('[',cuaditer,']',cuadruplos[cuaditer])
         operations[c.pos1](c.pos2, c.pos3, c.pos4)
         
         cuaditer += 1
-        print("PROGCUAD: ", cuaditer)
-        memoria.printVars()
+        #print("PROGCUAD: ", cuaditer)
+        #memoria.printVars()
         
 #Funcion que pregunta por el archivo y ejecuta runProgram una vez parseado el archivo
 def OpenRunFile():
@@ -322,13 +326,13 @@ def OpenRunFile():
     f = open(file_path,"r")
     data = f.read()
     t = yacc.parse(data)
-    print (pilao)
-    print (ptipos)
-    print (len(cuadruplos))
-    memoria.printVars()
-    for x in range (0, len(cuadruplos)) :
-        print ('[',x,']',cuadruplos[x].pos1, ',' , cuadruplos[x].pos2,
-            ',' ,cuadruplos[x].pos3, ',', cuadruplos[x].pos4)
+    #print (pilao)
+    #print (ptipos)
+    #print (len(cuadruplos))
+    #memoria.printVars()
+    #for x in range (0, len(cuadruplos)) :
+    #    print ('[',x,']',cuadruplos[x].pos1, ',' , cuadruplos[x].pos2,
+    #        ',' ,cuadruplos[x].pos3, ',', cuadruplos[x].pos4)
     runProgram()
     reinitializeParser()
     global cuaditer
